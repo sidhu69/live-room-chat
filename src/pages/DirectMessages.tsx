@@ -69,7 +69,8 @@ export default function DirectMessages() {
   useEffect(() => {
     if (selectedContact && currentUser) {
       fetchMessages();
-      setupRealtimeSubscription();
+      const cleanup = setupRealtimeSubscription();
+      return cleanup;
     }
   }, [selectedContact, currentUser]);
 
@@ -174,46 +175,91 @@ export default function DirectMessages() {
   };
 
   const startChat = async (friendId: string) => {
-    if (!currentUser) return;
+    if (!currentUser || !searchedUser) return;
 
-    // Check if connection exists
-    const { data: existing } = await supabase
-      .from('user_connections')
-      .select('*')
-      .or(`and(user_id.eq.${currentUser.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${currentUser.id})`)
-      .single();
-
-    if (!existing) {
-      // Create connection with pending status
-      const { error } = await supabase
+    try {
+      // Check if connection exists
+      const { data: existing } = await supabase
         .from('user_connections')
-        .insert({
-          user_id: currentUser.id,
-          friend_id: friendId,
-          status: 'pending'
-        });
+        .select('*')
+        .or(`and(user_id.eq.${currentUser.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${currentUser.id})`)
+        .single();
 
-      if (error) {
+      let connectionId = existing?.id;
+
+      if (!existing) {
+        // Create connection with pending status
+        const { data: newConnection, error } = await supabase
+          .from('user_connections')
+          .insert({
+            user_id: currentUser.id,
+            friend_id: friendId,
+            status: 'pending'
+          })
+          .select()
+          .single();
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Failed to start chat",
+            variant: "destructive"
+          });
+          return;
+        }
+        connectionId = newConnection.id;
+      }
+
+      // Fetch the friend's profile
+      const { data: profile } = await supabase
+        .from('public_profiles')
+        .select('*')
+        .eq('user_id', friendId)
+        .single();
+
+      if (!profile) {
         toast({
           title: "Error",
-          description: "Failed to start chat",
+          description: "Failed to load user profile",
           variant: "destructive"
         });
         return;
       }
-    }
 
-    await fetchContacts();
-    setShowUserProfile(false);
-    setSearchUsername("");
-    
-    // Find and select the contact
-    setTimeout(() => {
-      const contact = contacts.find(c => c.friend_id === friendId);
-      if (contact) {
-        setSelectedContact(contact);
-      }
-    }, 500);
+      // Create contact object
+      const newContact: Contact = {
+        id: connectionId || '',
+        user_id: currentUser.id,
+        friend_id: friendId,
+        status: existing?.status || 'pending',
+        profile: profile as UserProfile
+      };
+
+      // Close modal and open chat
+      setShowUserProfile(false);
+      setSearchUsername("");
+      setSearchedUser(null);
+      
+      // Set selected contact to open chat
+      setSelectedContact(newContact);
+      
+      // Refresh contacts list to show in sidebar
+      await fetchContacts();
+
+      toast({
+        title: "Chat opened",
+        description: existing?.status === 'accepted' 
+          ? "You can now chat freely"
+          : "Send a message to start the conversation"
+      });
+    } catch (error) {
+      console.error('Error starting chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to open chat",
+        variant: "destructive"
+      });
+    }
   };
 
   const sendFriendRequest = async (friendId: string) => {
