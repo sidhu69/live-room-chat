@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, Fingerprint, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,7 +16,7 @@ const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   
-  const { login, resetPassword, checkBiometric, loginWithBiometric } = useAuth();
+  const { login, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,44 +62,47 @@ const Login = () => {
     }
   };
 
-  const handleBiometricLogin = async () => {
-    try {
-      const isAvailable = await checkBiometric();
-      if (isAvailable) {
-        await loginWithBiometric();
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Biometric not available",
-          description: "Please use username/email and password"
-        });
-      }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Biometric login failed",
-        description: error.message
-      });
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-room-primary/20 via-background to-room-primary-glow/20 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 bg-room-primary/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-96 h-96 bg-room-primary-glow/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.5, 0.3, 0.5],
+          }}
+          transition={{ duration: 10, repeat: Infinity }}
+        />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.5, type: "spring" }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="bg-card/90 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-border/50">
+        <div className="bg-card/95 backdrop-blur-xl rounded-3xl p-8 shadow-[0_20px_80px_rgba(168,85,247,0.3)] border border-room-primary/20 relative overflow-hidden">
+          {/* Card glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-room-primary/5 to-transparent pointer-events-none" />
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="text-center mb-8"
+            className="text-center mb-8 relative z-10"
           >
-            <h1 className="text-3xl font-bold text-foreground mb-2">Welcome Back</h1>
-            <p className="text-muted-foreground">Sign in to continue to your account</p>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-room-primary via-room-primary-glow to-room-primary bg-clip-text text-transparent mb-2">
+              Welcome Back
+            </h1>
+            <p className="text-muted-foreground">Sign in to continue your journey</p>
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -175,29 +178,15 @@ const Login = () => {
             >
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-primary-foreground font-medium py-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
+                className="w-full bg-gradient-to-r from-room-primary via-room-primary-glow to-room-primary hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] text-white font-semibold py-6 rounded-xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-0.5"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
-              </Button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border/50" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or</span>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                onClick={handleBiometricLogin}
-                variant="outline"
-                className="w-full border-border/50 bg-background/50 hover:bg-accent/50 py-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
-              >
-                <Fingerprint className="w-5 h-5 mr-2 text-primary" />
-                Use Fingerprint
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Signing in...
+                  </span>
+                ) : "Sign In"}
               </Button>
             </motion.div>
           </form>

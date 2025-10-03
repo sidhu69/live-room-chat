@@ -10,7 +10,6 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import YourName from "./pages/Auth/YourName";
 import PfpUpload from "./pages/Auth/PfpUpload";
-import FingerprintLogin from "./pages/Auth/FingerprintLogin";
 import RoomChat from "./pages/RoomChat";
 
 const queryClient = new QueryClient();
@@ -23,8 +22,8 @@ const AppContent = () => {
   if (loading) {
     console.log('[App] Showing loading spinner');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-room-primary/20 via-background to-room-primary-glow/20 flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-room-primary/30 border-t-room-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -36,7 +35,6 @@ const AppContent = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/fingerprint" element={<FingerprintLogin />} />
         <Route path="*" element={<Login />} />
       </Routes>
     );

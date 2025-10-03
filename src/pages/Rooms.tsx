@@ -13,10 +13,31 @@ const Rooms = () => {
   const { rooms, loading, joinRoom } = useRooms();
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-room-primary/5 to-room-primary-glow/10 pb-20 relative overflow-hidden">
+      {/* Animated background orbs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-40 -left-20 w-64 h-64 bg-room-primary/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, 50, 0],
+            y: [0, 30, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-40 -right-20 w-96 h-96 bg-room-primary-glow/10 rounded-full blur-3xl"
+          animate={{
+            x: [0, -50, 0],
+            y: [0, -30, 0],
+            scale: [1.1, 1, 1.1],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
       {/* Header */}
       <motion.div
-        className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border"
+        className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-room-primary/20 shadow-lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -49,11 +70,12 @@ const Rooms = () => {
         >
           <Button
             onClick={() => setShowCreateModal(true)}
-            className="h-24 bg-gradient-to-r from-room-primary to-room-primary-glow hover:shadow-lg transition-all duration-200 group"
+            className="h-24 bg-gradient-to-r from-room-primary via-room-primary-glow to-room-primary hover:shadow-[0_0_40px_rgba(168,85,247,0.5)] transition-all duration-500 group relative overflow-hidden"
             size="lg"
           >
-            <div className="flex flex-col items-center space-y-2">
-              <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            <div className="flex flex-col items-center space-y-2 relative z-10">
+              <Plus className="w-8 h-8 group-hover:scale-110 group-hover:rotate-90 transition-all duration-300" />
               <span className="font-semibold">Create Room</span>
             </div>
           </Button>
@@ -61,11 +83,11 @@ const Rooms = () => {
           <Button
             onClick={() => setShowJoinModal(true)}
             variant="outline"
-            className="h-24 border-2 border-room-primary/20 hover:border-room-primary/40 hover:bg-room-primary/5 transition-all duration-200 group"
+            className="h-24 border-2 border-room-primary/30 hover:border-room-primary hover:bg-gradient-to-br hover:from-room-primary/10 hover:to-room-primary-glow/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] transition-all duration-500 group backdrop-blur-sm"
             size="lg"
           >
             <div className="flex flex-col items-center space-y-2">
-              <Hash className="w-8 h-8 text-room-primary group-hover:scale-110 transition-transform" />
+              <Hash className="w-8 h-8 text-room-primary group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
               <span className="font-semibold text-room-primary">Join Room</span>
             </div>
           </Button>
@@ -108,11 +130,11 @@ const Rooms = () => {
             {rooms.map((room, index) => (
               <motion.div
                 key={room.id}
-                className="p-4 bg-card border border-border rounded-lg hover:shadow-md transition-all duration-200"
+                className="p-4 bg-gradient-to-br from-card to-card/80 border border-room-primary/20 rounded-2xl hover:shadow-[0_8px_30px_rgba(168,85,247,0.2)] hover:border-room-primary/40 transition-all duration-300 backdrop-blur-sm"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.02 }}
+                transition={{ delay: 0.1 * index, type: "spring" }}
+                whileHover={{ scale: 1.02, y: -4 }}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -123,7 +145,7 @@ const Rooms = () => {
                   </div>
                   <Button
                     size="sm"
-                    className="bg-room-primary hover:bg-room-primary/90"
+                    className="bg-gradient-to-r from-room-primary to-room-primary-glow hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all duration-300 hover:scale-105"
                     onClick={async () => {
                       const joined = await joinRoom(room.code);
                       if (joined) navigate(`/rooms/${room.id}`);

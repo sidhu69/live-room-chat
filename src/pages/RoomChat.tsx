@@ -130,14 +130,31 @@ const RoomChat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-background via-room-primary/5 to-room-primary-glow/10 pb-24 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute top-20 left-10 w-96 h-96 bg-room-primary/10 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 12, repeat: Infinity }}
+        />
+      </div>
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-room-primary/20 shadow-lg">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-semibold text-foreground">{roomName || "Room"}</h1>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-room-primary to-room-primary-glow bg-clip-text text-transparent">
+            {roomName || "Room"}
+          </h1>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/rooms')}>Back</Button>
-            <Button variant="destructive" onClick={handleLeave}>Leave</Button>
+            <Button variant="outline" className="border-room-primary/30 hover:bg-room-primary/10" onClick={() => navigate('/rooms')}>
+              Back
+            </Button>
+            <Button variant="destructive" className="hover:shadow-lg transition-all duration-300" onClick={handleLeave}>
+              Leave
+            </Button>
           </div>
         </div>
       </div>
@@ -150,11 +167,14 @@ const RoomChat = () => {
           messages.map((m) => (
             <motion.div
               key={m.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-3 rounded-lg bg-card border border-border"
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="p-4 rounded-2xl bg-gradient-to-br from-card to-card/80 border border-room-primary/20 shadow-sm hover:shadow-[0_4px_20px_rgba(168,85,247,0.15)] transition-all duration-300 backdrop-blur-sm"
             >
-              <div className="text-sm text-muted-foreground">{new Date(m.created_at).toLocaleTimeString()}</div>
+              <div className="text-xs text-room-primary font-medium mb-1">
+                {new Date(m.created_at).toLocaleTimeString()}
+              </div>
               <div className="text-foreground">{m.content}</div>
             </motion.div>
           ))
@@ -163,7 +183,7 @@ const RoomChat = () => {
       </div>
 
       {/* Composer */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3">
+      <div className="fixed inset-x-0 bottom-0 border-t border-room-primary/20 bg-background/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(168,85,247,0.1)] p-3 relative z-40">
         <div className="max-w-3xl mx-auto flex gap-2">
           <Input
             value={input}
@@ -176,8 +196,17 @@ const RoomChat = () => {
             }}
             placeholder={isPublic ? "Message public room" : "Message private room"}
             maxLength={MAX_MESSAGE_LENGTH}
+            className="border-room-primary/30 focus:border-room-primary focus:ring-room-primary/20 bg-background/80 backdrop-blur-sm"
           />
-          <Button onClick={sendMessage} disabled={sending}>Send</Button>
+          <Button 
+            onClick={sendMessage} 
+            disabled={sending}
+            className="bg-gradient-to-r from-room-primary to-room-primary-glow hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300"
+          >
+            {sending ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : "Send"}
+          </Button>
         </div>
       </div>
     </div>
