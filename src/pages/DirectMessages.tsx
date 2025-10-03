@@ -210,21 +210,15 @@ export default function DirectMessages() {
         connectionId = newConnection.id;
       }
 
-      // Fetch the friend's profile
-      const { data: profile } = await supabase
-        .from('public_profiles')
-        .select('*')
-        .eq('user_id', friendId)
-        .single();
-
-      if (!profile) {
-        toast({
-          title: "Error",
-          description: "Failed to load user profile",
-          variant: "destructive"
-        });
-        return;
-      }
+      // Use the profile data we already have from searchedUser
+      const profile: UserProfile = {
+        user_id: searchedUser.user_id,
+        username: searchedUser.username,
+        display_name: searchedUser.display_name || searchedUser.username,
+        avatar_url: searchedUser.avatar_url || '',
+        level: searchedUser.level,
+        charms_total: searchedUser.charms_total
+      };
 
       // Create contact object
       const newContact: Contact = {
